@@ -1,4 +1,4 @@
-module Counter exposing (..)
+module Counter exposing (main)
 
 import Browser exposing (Document)
 import Html exposing (..)
@@ -6,8 +6,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
 
-program : Program () Model Msg
-program =
+main : Program () Model Msg
+main =
     Browser.document
         { init = init
         , view = view
@@ -42,12 +42,10 @@ update msg (Value i) =
 
 view : Model -> Document Msg
 view (Value i) =
-    { title = "Learn Elm"
+    { title = "Counter"
     , body =
-        [ div [ class "container d-flex" ]
-            [ button [ onClick Decrement, class "btn btn-primary" ] [ text "-" ]
-            , div [] [ text (String.fromInt i) ]
-            , button [ onClick Increment, class "btn btn-primary" ] [ text "+" ]
-            ]
+        [ button [ onClick Decrement ] [ text "-" ]
+        , div [] [ text (String.fromInt i) ]
+        , button [ onClick Increment ] [ text "+" ]
         ]
     }
