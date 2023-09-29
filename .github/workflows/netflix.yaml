@@ -19,7 +19,7 @@ jobs:
         sudo mv elm /usr/local/bin/
         elm --help
     - name: Compile Elm
-      run: elm make src/Main.elm --output=out/main.js --optimize
+      run: elm make src/Main.elm --output=public/main.js --optimize
     - name: Deploy to Netlify
       uses: netlify/actions/cli@master
       with:
