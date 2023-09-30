@@ -44,8 +44,10 @@ view : Model -> Document Msg
 view (Value i) =
     { title = "Counter"
     , body =
-        [ button [ onClick Decrement ] [ text "-" ]
-        , div [] [ text (String.fromInt i) ]
-        , button [ onClick Increment ] [ text "+" ]
+        [ div [ class "container" ]
+            [ button [ onClick Decrement ] [ text "-" ]
+            , div [] [ text (String.fromInt i) ]
+            , button [ onClick Increment ] [ text "+" ]
+            ]
         ]
     }

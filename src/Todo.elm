@@ -154,64 +154,94 @@ updateEntry msg entry =
 
 viewEntry : Entry -> Html Msg
 viewEntry entry =
-    li []
-        [ input
-            [ type_ "checkbox"
-            , checked entry.finished
-            , onClick (ToggleFinished entry.id)
-            ]
-            []
-        , span
-            [ class
-                ((if entry.finished then
-                    "finished"
+    let
+        deleteButton =
+            button [ onClick (DeleteEntry entry.id), class "btn btn-outline-danger" ]
+                [ i [ class "bi bi-trash" ] [] ]
 
-                  else
-                    ""
-                 )
-                    ++ (if entry.editing then
-                            " hidden"
+        editButton =
+            button [ onClick (ToggleEditEntry entry.id), class "btn btn-outline-secondary" ]
+                [ i
+                    [ class
+                        (if entry.editing then
+                            "bi bi-x-lg"
 
-                        else
-                            ""
-                       )
-                )
-            ]
-            [ text entry.countent ]
-        , input
-            [ type_ "text"
-            , value entry.editDraft
-            , class
-                (if entry.editing then
-                    ""
+                         else
+                            "bi bi-pencil"
+                        )
+                    ]
+                    []
+                ]
 
-                 else
-                    "hidden"
-                )
-            , onInput (EditWriteContent entry.id)
-            ]
-            []
-        , button [ onClick (DeleteEntry entry.id) ] [ text "delete" ]
-        , button [ onClick (ToggleEditEntry entry.id) ]
-            [ text
-                (if entry.editing then
-                    "cancel"
+        saveButton =
+            button
+                [ onClick (SaveChange entry.id)
+                , class "btn btn-outline-success"
+                ]
+                [ i [ class "bi bi-check-lg" ] []
+                ]
 
-                 else
-                    "edit"
-                )
-            ]
-        , button
-            [ onClick (SaveChange entry.id)
-            , class
-                (if entry.editing then
-                    ""
+        buttons =
+            if entry.editing then
+                [ deleteButton, editButton, saveButton ]
 
-                 else
-                    "hidden"
-                )
+            else
+                [ deleteButton, editButton ]
+    in
+    li [ class "list-group-item d-flex justify-content-between align-items-center" ]
+        [ div []
+            [ input
+                [ type_ "checkbox"
+                , checked entry.finished
+                , onClick (ToggleFinished entry.id)
+                , class
+                    ("form-check-input "
+                        ++ (if entry.editing then
+                                "d-none"
+
+                            else
+                                ""
+                           )
+                    )
+                , id ("checkbox-" ++ String.fromInt entry.id)
+                ]
+                []
+            , label
+                [ class
+                    ("ml-2 "
+                        ++ (if entry.finished then
+                                "text-decoration-line-through "
+
+                            else
+                                ""
+                           )
+                        ++ (if entry.editing then
+                                "d-none"
+
+                            else
+                                ""
+                           )
+                    )
+                , for ("checkbox-" ++ String.fromInt entry.id)
+                ]
+                [ text entry.countent ]
+            , input
+                [ type_ "text"
+                , value entry.editDraft
+                , class
+                    ("form-control "
+                        ++ (if entry.editing then
+                                ""
+
+                            else
+                                "d-none"
+                           )
+                    )
+                , onInput (EditWriteContent entry.id)
+                ]
+                []
             ]
-            [ text "save" ]
+        , div [ class "btn-group" ] buttons
         ]
 
 
@@ -219,11 +249,18 @@ view : Model -> Document Msg
 view model =
     { title = "Todo"
     , body =
-        [ input [ type_ "text", value model.current, onInput WriteCurrent ] []
-        , button [ onClick AddEntry ]
-            [ text "add" ]
-        , ul
-            []
-            (List.map viewEntry model.entries)
+        [ div [ class "container mt-5" ]
+            [ h1 [ class "text-center" ] [ text "Todo List" ]
+            , section [ class "input-group mt-3" ]
+                [ input [ type_ "text", value model.current, class "form-control", onInput WriteCurrent ] []
+                , button [ onClick AddEntry, class "btn btn-primary" ]
+                    [ text "add" ]
+                ]
+            , section [ class "mt-3" ]
+                [ ul
+                    [ class "list-group" ]
+                    (List.map viewEntry model.entries)
+                ]
+            ]
         ]
     }
