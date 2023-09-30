@@ -1,4 +1,4 @@
-module Todo exposing (main)
+port module Todo exposing (main)
 
 import Browser exposing (Document)
 import Html exposing (..)
@@ -6,12 +6,15 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
 
-main : Program () Model Msg
+port setStorage : Model -> Cmd msg
+
+
+main : Program (Maybe Model) Model Msg
 main =
     Browser.document
         { init = init
         , view = view
-        , update = update
+        , update = updateWithStorage
         , subscriptions = \_ -> Sub.none
         }
 
@@ -36,9 +39,14 @@ type alias Entry =
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( Model [] "" 0, Cmd.none )
+init : Maybe Model -> ( Model, Cmd Msg )
+init m =
+    case m of
+        Just model ->
+            ( model, Cmd.none )
+
+        Nothing ->
+            ( Model [] "" 0, Cmd.none )
 
 
 initEntry : Int -> String -> Entry
@@ -58,6 +66,15 @@ type Msg
     | EditWriteContent Int String
     | SaveChange Int
     | ToggleEditEntry Int
+
+
+updateWithStorage : Msg -> Model -> ( Model, Cmd Msg )
+updateWithStorage msg model =
+    let
+        ( newModel, cmd ) =
+            update msg model
+    in
+    ( newModel, Cmd.batch [ cmd, setStorage newModel ] )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -253,8 +270,10 @@ view model =
             [ h1 [ class "text-center" ] [ text "Todo List" ]
             , section [ class "input-group mt-3" ]
                 [ input [ type_ "text", value model.current, class "form-control", onInput WriteCurrent ] []
+                , button [ onClick AddEntry, class "btn btn-secondary" ]
+                    [ i [ class "bi bi-arrow-clockwise" ] [] ]
                 , button [ onClick AddEntry, class "btn btn-primary" ]
-                    [ text "add" ]
+                    [ i [ class "bi bi-plus-lg" ] [] ]
                 ]
             , section [ class "mt-3" ]
                 [ ul
