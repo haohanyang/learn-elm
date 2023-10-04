@@ -3,7 +3,7 @@ name: Deploy to Netlify
 on:
   push:
     branches: [ "master" ]
-    paths: [ "src/**", "public/**" ]
+    paths: [ "src/**", "public/**", ".github/workflows/netlify.yaml" ]
   pull_request:
     branches: [ "master" ]
 
