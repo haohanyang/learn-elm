@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Setup Node18.x
+    - name: Setup Node16
       uses: actions/setup-node@v3
       with:
-        node-version: '18.x'
+        node-version: '16.x'
     - name: Set up Elm
       run: |
         curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz
