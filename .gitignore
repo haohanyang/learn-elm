@@ -5,3 +5,7 @@ repl-temp-*
 public/main.js
 
 .DS_Store
+
+node_modules/
+.parcel-cache/
+dist/

@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Setup Node18.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
     - name: Set up Elm
       run: |
         curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz
@@ -19,12 +23,14 @@ jobs:
         chmod +x elm
         sudo mv elm /usr/local/bin/
         elm --help
-    - name: Compile Elm
-      run: elm make src/Main.elm --output=public/main.js --optimize
+    - name: Build
+      run: |
+        npm run build
+        mv public/_redirects dist/
     - name: Deploy to Netlify
       uses: netlify/actions/cli@master
       with:
-        args: deploy --dir=public --prod
+        args: deploy --dir=dist --prod
       env:
         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}

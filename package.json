@@ -1,0 +1,26 @@
+{
+  "name": "learn_elm",
+  "version": "1.0.0",
+  "description": "This repository contains a collection of small Elm programs that I wrote while learning the language. Try them out at [learn-elm.netlify.app](https://learn-elm.netlify.app).",
+  "source": "public/index.html",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "private": true,
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build",
+    "clean": "rm -rf dist .parcel-cache"
+  },
+  "author": "Haohan Yang",
+  "license": "ISC",
+  "devDependencies": {
+    "@parcel/packager-raw-url": "^2.9.3",
+    "@parcel/transformer-elm": "^2.9.3",
+    "@parcel/transformer-webmanifest": "^2.9.3",
+    "elm": "^0.19.1-5",
+    "parcel": "^2.9.3"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.2",
+    "bootstrap-icons": "^1.11.1"
+  }
+}
