@@ -25,6 +25,7 @@ jobs:
         elm --help
     - name: Build
       run: |
+        npm ci
         npm run build
         mv public/_redirects dist/
     - name: Deploy to Netlify
