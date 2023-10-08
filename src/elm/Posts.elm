@@ -1,6 +1,6 @@
 module Posts exposing (Model, Msg, init, update, view)
 
-import Html exposing (Html, div, h1, text)
+import Html exposing (Html, div, h1, h5, h6, text)
 import Html.Attributes exposing (class)
 import Http
 import Json.Decode exposing (Decoder, field, int, list, map4, string)
@@ -67,10 +67,10 @@ update msg model =
 
 viewPost : Post -> Html Msg
 viewPost post =
-    div [ class "card" ]
+    div [ class "card mt-2" ]
         [ div [ class "card-body" ]
-            [ div [ class "card-title" ] [ text post.title ]
-            , div [ class "card-subtitle mb-2 text-body-secondary" ] [ text ("User" ++ String.fromInt post.userId) ]
+            [ h5 [ class "card-title" ] [ text post.title ]
+            , h6 [ class "card-subtitle mb-2 text-body-secondary" ] [ text ("User" ++ String.fromInt post.userId) ]
             , div [ class "card-text" ] [ text post.body ]
             ]
         ]
@@ -82,7 +82,7 @@ view model =
         content =
             case model of
                 Loading ->
-                    div [ class "spinner-border mx-auto" ] []
+                    div [ class "spinner-border d-block mx-auto" ] []
 
                 Failure ->
                     div [ class "alert alert-danger" ] [ text "Failed to load posts" ]

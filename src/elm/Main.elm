@@ -58,7 +58,20 @@ urlToPage url =
 
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( { page = urlToPage url, key = key }, Cmd.none )
+    updateUrl url { page = NotFoundPage, key = key }
+
+
+updateUrl : Url -> Model -> ( Model, Cmd Msg )
+updateUrl url model =
+    case Parser.parse parser url of
+        Just Home ->
+            Home.init |> toHome model
+
+        Just Posts ->
+            Posts.init |> toPosts model
+
+        Nothing ->
+            ( model, Cmd.none )
 
 
 
@@ -83,11 +96,11 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ChangedUrl url ->
-            ( { model | page = urlToPage url }, Cmd.none )
-
         ClickedLink (Browser.External href) ->
             ( model, Nav.load href )
+
+        ChangedUrl url ->
+            updateUrl url model
 
         ClickedLink (Browser.Internal url) ->
             ( model, Nav.pushUrl model.key (Url.toString url) )
