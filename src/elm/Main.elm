@@ -1,4 +1,4 @@
-module Main exposing (..)
+module Main exposing (main)
 
 import Browser exposing (Document)
 import Browser.Navigation as Nav
@@ -7,11 +7,12 @@ import Html exposing (Html, a, button, div, h1, li, nav, span, text, ul)
 import Html.Attributes exposing (attribute, class, classList, href, id, type_)
 import Html.Lazy exposing (lazy)
 import Posts exposing (Model, Msg, init, view)
+import Todo exposing (Model, Msg, init, view)
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), Parser, s)
 
 
-main : Program () Model Msg
+main : Program (Maybe Todo.Model) Model Msg
 main =
     Browser.application
         { init = init
@@ -26,11 +27,13 @@ main =
 type Route
     = Home
     | Posts
+    | Todos
 
 
 type Page
     = HomePage Home.Model
     | PostsPage Posts.Model
+    | TodosPage Todo.Model
     | NotFoundPage
 
 
@@ -40,25 +43,13 @@ parser =
         [ Parser.map Home Parser.top
         , Parser.map Home (s "home")
         , Parser.map Posts (s "posts")
+        , Parser.map Todos (s "todos")
         ]
 
 
-urlToPage : Url -> Page
-urlToPage url =
-    case Parser.parse parser url of
-        Just Home ->
-            HomePage (Tuple.first Home.init)
-
-        Just Posts ->
-            PostsPage (Tuple.first Posts.init)
-
-        Nothing ->
-            NotFoundPage
-
-
-init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
+init : Maybe Todo.Model -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    updateUrl url { page = NotFoundPage, key = key }
+    updateUrl url { page = NotFoundPage, key = key, initTodos = flags }
 
 
 updateUrl : Url -> Model -> ( Model, Cmd Msg )
@@ -70,6 +61,9 @@ updateUrl url model =
         Just Posts ->
             Posts.init |> toPosts model
 
+        Just Todos ->
+            Todo.init model.initTodos |> toTodos model
+
         Nothing ->
             ( model, Cmd.none )
 
@@ -79,7 +73,7 @@ updateUrl url model =
 
 
 type alias Model =
-    { page : Page, key : Nav.Key }
+    { page : Page, key : Nav.Key, initTodos : Maybe Todo.Model }
 
 
 
@@ -91,6 +85,7 @@ type Msg
     | ClickedLink Browser.UrlRequest
     | GotHomesMsg Home.Msg
     | GotPostsMsg Posts.Msg
+    | GotTodosMsg Todo.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -121,6 +116,14 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        GotTodosMsg todoMsg ->
+            case model.page of
+                TodosPage todoModel ->
+                    toTodos model (Todo.updateWithStorage todoMsg todoModel)
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -133,6 +136,7 @@ viewHeader page =
         links =
             [ navLink Home { url = "/", caption = "Home" }
             , navLink Posts { url = "/posts", caption = "Posts" }
+            , navLink Posts { url = "/todos", caption = "Todos" }
             ]
 
         navLink : Route -> { url : String, caption : String } -> Html msg
@@ -191,6 +195,11 @@ toPosts model ( postsModel, cmd ) =
     ( { model | page = PostsPage postsModel }, Cmd.map GotPostsMsg cmd )
 
 
+toTodos : Model -> ( Todo.Model, Cmd Todo.Msg ) -> ( Model, Cmd Msg )
+toTodos model ( todoModel, cmd ) =
+    ( { model | page = TodosPage todoModel }, Cmd.map GotTodosMsg cmd )
+
+
 viewContent : Page -> Html Msg
 viewContent page =
     case page of
@@ -199,6 +208,9 @@ viewContent page =
 
         PostsPage postsModel ->
             Posts.view postsModel |> Html.map GotPostsMsg
+
+        TodosPage todoModel ->
+            Todo.view todoModel |> Html.map GotTodosMsg
 
         NotFoundPage ->
             div [ class "container" ] [ h1 [] [ text "Not Found" ] ]
