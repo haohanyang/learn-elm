@@ -96,7 +96,7 @@ subscriptions _ =
 
 viewMessage : Message -> Html Msg
 viewMessage message =
-    div [ classList [ ( "list-group-item", True ), ( "active", message.fromRemote ) ] ]
+    div [ classList [ ( "list-group-item", True ), ( "text-primary", not message.fromRemote ) ] ]
         [ text message.content ]
 
 
@@ -104,7 +104,10 @@ view : Model -> Html Msg
 view model =
     div [ class "container pt-3" ]
         [ h1 [ class "mb-2" ] [ text "WebSocket Echo Chat" ]
-        , section [ class "list-group mb-3" ] (List.map viewMessage (List.reverse model.messages))
+        , section [ class "card chat-messages mb-3" ]
+            [ div [ class "card-header fw-bold" ] [ text "Messages" ]
+            , div [ class "list-group list-group-flush" ] (List.map viewMessage (List.reverse model.messages))
+            ]
         , section [ class "input-group" ]
             [ input [ type_ "text", class "form-control", onInput EditMessage, value model.input ] []
             , button
