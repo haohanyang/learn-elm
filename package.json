@@ -18,10 +18,12 @@
     "@parcel/transformer-elm": "^2.9.3",
     "@parcel/transformer-sass": "^2.9.3",
     "@parcel/transformer-webmanifest": "^2.9.3",
+    "buffer": "^6.0.3",
     "elm": "^0.19.1-5",
     "parcel": "^2.9.3"
   },
   "dependencies": {
+    "@faker-js/faker": "^8.1.0",
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.11.1"
   }

@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser exposing (Document)
 import Browser.Navigation as Nav
-import Home exposing (Model, Msg, init, view)
+import Home exposing (Model, Msg, init, update, view)
 import Html exposing (Html, a, button, div, h1, li, nav, span, text, ul)
 import Html.Attributes exposing (attribute, class, classList, href, id, type_)
 import Html.Lazy exposing (lazy)
@@ -10,6 +10,7 @@ import Posts exposing (Model, Msg, init, view)
 import Todo exposing (Model, Msg, init, view)
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), Parser, s)
+import WebSocket exposing (Model, Msg, init, subscriptions, view)
 
 
 main : Program (Maybe Todo.Model) Model Msg
@@ -28,12 +29,14 @@ type Route
     = Home
     | Posts
     | Todos
+    | WebSocket
 
 
 type Page
     = HomePage Home.Model
     | PostsPage Posts.Model
     | TodosPage Todo.Model
+    | WebSocketPage WebSocket.Model
     | NotFoundPage
 
 
@@ -44,6 +47,7 @@ parser =
         , Parser.map Home (s "home")
         , Parser.map Posts (s "posts")
         , Parser.map Todos (s "todos")
+        , Parser.map WebSocket (s "websocket")
         ]
 
 
@@ -63,6 +67,9 @@ updateUrl url model =
 
         Just Todos ->
             Todo.init model.initTodos |> toTodos model
+
+        Just WebSocket ->
+            WebSocket.init |> toWebSocket model
 
         Nothing ->
             ( model, Cmd.none )
@@ -86,6 +93,7 @@ type Msg
     | GotHomesMsg Home.Msg
     | GotPostsMsg Posts.Msg
     | GotTodosMsg Todo.Msg
+    | GotWebSocketMsg WebSocket.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -124,10 +132,23 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        GotWebSocketMsg webSocketMsg ->
+            case model.page of
+                WebSocketPage webSocketModel ->
+                    toWebSocket model (WebSocket.update webSocketMsg webSocketModel)
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    case model.page of
+        WebSocketPage webSocketModel ->
+            WebSocket.subscriptions webSocketModel |> Sub.map GotWebSocketMsg
+
+        _ ->
+            Sub.none
 
 
 viewHeader : Page -> Html Msg
@@ -136,7 +157,8 @@ viewHeader page =
         links =
             [ navLink Home { url = "/", caption = "Home" }
             , navLink Posts { url = "/posts", caption = "Posts" }
-            , navLink Posts { url = "/todos", caption = "Todos" }
+            , navLink Todos { url = "/todos", caption = "Todos" }
+            , navLink WebSocket { url = "/websocket", caption = "WebSocket" }
             ]
 
         navLink : Route -> { url : String, caption : String } -> Html msg
@@ -200,6 +222,11 @@ toTodos model ( todoModel, cmd ) =
     ( { model | page = TodosPage todoModel }, Cmd.map GotTodosMsg cmd )
 
 
+toWebSocket : Model -> ( WebSocket.Model, Cmd WebSocket.Msg ) -> ( Model, Cmd Msg )
+toWebSocket model ( webSocketModel, cmd ) =
+    ( { model | page = WebSocketPage webSocketModel }, Cmd.map GotWebSocketMsg cmd )
+
+
 viewContent : Page -> Html Msg
 viewContent page =
     case page of
@@ -212,8 +239,11 @@ viewContent page =
         TodosPage todoModel ->
             Todo.view todoModel |> Html.map GotTodosMsg
 
+        WebSocketPage webSocketModel ->
+            WebSocket.view webSocketModel |> Html.map GotWebSocketMsg
+
         NotFoundPage ->
-            div [ class "container" ] [ h1 [] [ text "Not Found" ] ]
+            div [ class "container pt-3" ] [ h1 [] [ text "Not Found" ] ]
 
 
 view : Model -> Document Msg
